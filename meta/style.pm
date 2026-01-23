@@ -632,7 +632,7 @@ sub GetAcronyms
 {
     # load acronyms list from file
 
-    my $filename = "acronyms.txt";
+    my $filename = "$main::META_DIR/acronyms.txt";
 
     open FILE, $filename or die "Couldn't open file $filename: $!";
 

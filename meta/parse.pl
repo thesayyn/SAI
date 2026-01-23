@@ -40,9 +40,25 @@ use test;
 use serialize;
 use cap;
 
-our $XMLDIR = "xml";
-our $INCLUDE_DIR = "../inc/";
-our $EXPERIMENTAL_DIR = "../experimental/";
+use File::Spec;
+use Runfiles;
+our $r = Runfiles->create();
+
+# TODO BL: Figure out what to do with compatibility
+# our $INCLUDE_DIR = "../inc";
+# our $EXPERIMENTAL_DIR = "../experimental/";
+# our $XMLDIR = "xml";
+our $INCLUDE_DIR = $r->rlocation("sonic-sairedis/SAI/inc");
+our $EXPERIMENTAL_DIR = $r->rlocation("sonic-sairedis/SAI/experimental");
+our $META_DIR = $r->rlocation("sonic-sairedis/SAI/meta");
+our $XMLDIR = $r->rlocation("sonic-sairedis/SAI/meta/xml");
+# print "BL: XMLDIR=$XMLDIR\n";
+# TODO BL: Figure out if we can use something other than OUTFILEMARKER
+# TODO BL: Figure out if dirname is enough, or we should actually parse the path.
+our $OUTFILEMARKER = $ENV{OUTFILEMARKER};
+our ($irrelevant, $OUTDIR, $irrelevant2) = File::Spec->splitpath($OUTFILEMARKER);
+print "BL: OUTFILEMARKER=$OUTFILEMARKER\n";
+print "BL: OUTDIR=$OUTDIR\n";
 
 our $MAX_CONDITIONS_LEN = 1;
 
@@ -2468,7 +2484,7 @@ sub CreateMetadata
 
 sub ProcessSaiStatus
 {
-    my $filename = "../inc/saistatus.h";
+    my $filename = "$main::INCLUDE_DIR/saistatus.h";
 
     open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
 

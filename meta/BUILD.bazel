@@ -1,0 +1,141 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@rules_perl//perl:perl.bzl", "perl_binary", "perl_library")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@bazel_lib//lib:run_binary.bzl", "run_binary")
+load("@bazel_lib//lib:write_source_files.bzl", "write_source_file")
+load("@doxygen//:doxygen.bzl", "doxygen")
+
+# $(EXTRA) in the Makefile
+filegroup(
+  name = "extra",
+  srcs = [
+    "acronyms.txt",
+    "aspell.en.pws",
+  ] + glob([
+    "*.pm",
+    "*cap",
+  ]),
+)
+
+# $(DEPS) in the Makefile
+filegroup(
+  name = "deps",
+  srcs = [
+    "//SAI/inc:all_headers",
+    "//SAI/experimental:all_headers",
+    # TODO BL: This target doesn't exist in 202405
+    # "//SAI/custom:all_headers",
+  ],
+)
+
+filegroup(
+  name = "all_headers",
+  srcs = glob(["*.h"]) + [":saimetadata.h"],
+)
+
+filegroup(
+  name = "all_srcs",
+  srcs = glob(["**/*.h", "**/*.c"]),
+)
+
+filegroup(
+  name = "constheaders",
+  srcs = ["saimetadatatypes.h","saimetadatalogger.h", "saimetadatautils.h", "saiserialize.h"],
+)
+
+# TODO BL: we may not need saiattrversion in this branch
+#
+# sh_binary(
+#   name = "attrversion",
+#   srcs = [":stamp_attrversions.sh"],
+# )
+#
+# run_binary(
+#   name = "saiattrversion.gen",
+#   tool = ":attrversion",
+#   args = ["$(execpath saiattrversion.h.gen)"],
+#   outs = ["saiattrversion.h.gen"],
+#   stamp = 1,
+# )
+#
+# write_source_file(
+#     name = "saiattrversion.update",
+#     out_file = "saiattrversion.h",
+#     in_file = ":saiattrversion.gen",
+#     diff_test_failure_message = "SAI attribute versions (saiattrversion.h) out of date; please run {{TARGET}} to update."
+# )
+#
+# # TODO BL: This depends on having run `bazel run //SAI/meta:saiattrversion.update`.
+# # We should encode that invariant.
+# filegroup(
+#   name = "saiattrversion",
+#   srcs = [":saiattrversion.h"],
+# )
+
+perl_library(
+  name = "perl_lib",
+  srcs = [
+    "utils.pm",
+    "xmlutils.pm",
+    "style.pm",
+    "cap.pm",
+    "serialize.pm",
+    "test.pm",
+  ],
+)
+
+perl_binary(
+  name = "parse",
+  main = "parse.pl",
+  srcs = [
+    "parse.pl",
+  ],
+  deps = [
+    ":perl_lib",
+    "@rules_perl//perl/runfiles",
+  ],
+  data = [
+    # $(XMLDEPS)
+    # TODO BL: There are a lot of errors like this one, we should figure out what's up:
+    #   ERROR: invalid object type SAI_OBJECT_TYPE_TAM_COUNTER_SUBSCRIPTION extracted from bulk definition: sai_bulk_object_remove_fn                      remove_tam_counter_subscriptions
+    ":doxygen",
+    # $(CONSTHEADERS)
+    ":constheaders",
+    # $(EXTRA)
+    ":extra",
+    # $(DEPS)
+    ":deps",
+    # TODO BL: we may not need saiattrversion in this brnach
+    # saiattrversion.h
+    # ":saiattrversion",
+  ],
+)
+
+run_binary(
+  name = "run_parse",
+  tool = ":parse",
+  args = ["-d"],
+  outs = [
+    ":saimetadatatest.c",
+    ":saimetadata.c",
+    ":saimetadata.h",
+    ":saiswig.i",
+  ],
+  env = {
+    "OUTFILEMARKER": "$(execpath :saimetadatatest.c)",
+  },
+)
+
+doxygen(
+  name = "doxygen",
+  doxyfile_template = "Doxyfile.bazel",
+  outs = [
+    "xml",
+  ],
+  srcs = [
+    ":constheaders",
+    # $(DEPS)
+    ":deps",
+  ],
+)

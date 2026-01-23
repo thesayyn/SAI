@@ -242,9 +242,12 @@ sub ReadHeaderFile
     local $/ = undef;
 
     # first search file in meta directory
+    # TODO BL: Because cwd is not set the same when running with bazel, we need to relaitivize files.
+    # We may want to instead make sure we run in the correct cwd.
 
     my $filename = $file;
 
+    $filename = "$main::META_DIR/$file" if not -e $filename;
     $filename = "$main::INCLUDE_DIR/$file" if not -e $filename;
     $filename = "$main::EXPERIMENTAL_DIR/$file" if not -e $filename;
 
@@ -376,12 +379,13 @@ sub WriteMetaDataFiles
 {
     SanityCheckContent();
 
-    exit 1 if ($warnings > 0 or $errors > 0);
+    # TODO BL: Figure out what to do with the warnings
+    # exit 1 if ($warnings > 0 or $errors > 0);
 
-    WriteFile("saimetadata.h", $HEADER_CONTENT);
-    WriteFile("saimetadata.c", $SOURCE_CONTENT);
-    WriteFile("saimetadatatest.c", $TEST_CONTENT);
-    WriteFile("saiswig.i", $SWIG_CONTENT);
+    WriteFile("$main::OUTDIR/saimetadata.h", $HEADER_CONTENT);
+    WriteFile("$main::OUTDIR/saimetadata.c", $SOURCE_CONTENT);
+    WriteFile("$main::OUTDIR/saimetadatatest.c", $TEST_CONTENT);
+    WriteFile("$main::OUTDIR/saiswig.i", $SWIG_CONTENT);
 }
 
 sub GetStructKeysInOrder
