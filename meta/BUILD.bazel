@@ -24,8 +24,6 @@ filegroup(
   srcs = [
     "//SAI/inc:all_headers",
     "//SAI/experimental:all_headers",
-    # TODO BL: This target doesn't exist in 202405
-    # "//SAI/custom:all_headers",
   ],
 )
 
@@ -43,35 +41,6 @@ filegroup(
   name = "constheaders",
   srcs = ["saimetadatatypes.h","saimetadatalogger.h", "saimetadatautils.h", "saiserialize.h"],
 )
-
-# TODO BL: we may not need saiattrversion in this branch
-#
-# sh_binary(
-#   name = "attrversion",
-#   srcs = [":stamp_attrversions.sh"],
-# )
-#
-# run_binary(
-#   name = "saiattrversion.gen",
-#   tool = ":attrversion",
-#   args = ["$(execpath saiattrversion.h.gen)"],
-#   outs = ["saiattrversion.h.gen"],
-#   stamp = 1,
-# )
-#
-# write_source_file(
-#     name = "saiattrversion.update",
-#     out_file = "saiattrversion.h",
-#     in_file = ":saiattrversion.gen",
-#     diff_test_failure_message = "SAI attribute versions (saiattrversion.h) out of date; please run {{TARGET}} to update."
-# )
-#
-# # TODO BL: This depends on having run `bazel run //SAI/meta:saiattrversion.update`.
-# # We should encode that invariant.
-# filegroup(
-#   name = "saiattrversion",
-#   srcs = [":saiattrversion.h"],
-# )
 
 perl_library(
   name = "perl_lib",
@@ -97,8 +66,6 @@ perl_binary(
   ],
   data = [
     # $(XMLDEPS)
-    # TODO BL: There are a lot of errors like this one, we should figure out what's up:
-    #   ERROR: invalid object type SAI_OBJECT_TYPE_TAM_COUNTER_SUBSCRIPTION extracted from bulk definition: sai_bulk_object_remove_fn                      remove_tam_counter_subscriptions
     ":doxygen",
     # $(CONSTHEADERS)
     ":constheaders",
@@ -106,9 +73,6 @@ perl_binary(
     ":extra",
     # $(DEPS)
     ":deps",
-    # TODO BL: we may not need saiattrversion in this brnach
-    # saiattrversion.h
-    # ":saiattrversion",
   ],
 )
 
