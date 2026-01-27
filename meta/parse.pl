@@ -48,11 +48,10 @@ our $r = Runfiles->create();
 # our $INCLUDE_DIR = "../inc";
 # our $EXPERIMENTAL_DIR = "../experimental/";
 # our $XMLDIR = "xml";
-our $INCLUDE_DIR = $r->rlocation("sonic-sairedis/SAI/inc");
-our $EXPERIMENTAL_DIR = $r->rlocation("sonic-sairedis/SAI/experimental");
-our $META_DIR = $r->rlocation("sonic-sairedis/SAI/meta");
-our $XMLDIR = $r->rlocation("sonic-sairedis/SAI/meta/xml");
-# print "BL: XMLDIR=$XMLDIR\n";
+our $INCLUDE_DIR = $r->rlocation("sai/inc");
+our $EXPERIMENTAL_DIR = $r->rlocation("sai/experimental");
+our $META_DIR = $r->rlocation("sai/meta");
+our $XMLDIR = $r->rlocation("sai/meta/xml");
 # TODO BL: Figure out if we can use something other than OUTFILEMARKER
 # TODO BL: Figure out if dirname is enough, or we should actually parse the path.
 our $OUTFILEMARKER = $ENV{OUTFILEMARKER};

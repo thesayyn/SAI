@@ -62,3 +62,6 @@ test/saithriftv2/sai_headers.py.bk
 test/saithriftv2/saiserver
 
 **/*.pyc
+
+# Bazel artifacts
+bazel-*

@@ -22,8 +22,8 @@ filegroup(
 filegroup(
   name = "deps",
   srcs = [
-    "//SAI/inc:all_headers",
-    "//SAI/experimental:all_headers",
+    "//inc:all_headers",
+    "//experimental:all_headers",
   ],
 )
 
@@ -79,7 +79,6 @@ perl_binary(
 run_binary(
   name = "run_parse",
   tool = ":parse",
-  args = ["-d"],
   outs = [
     ":saimetadatatest.c",
     ":saimetadata.c",
