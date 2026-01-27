@@ -40,24 +40,11 @@ use test;
 use serialize;
 use cap;
 
-use File::Spec;
-use Runfiles;
-our $r = Runfiles->create();
-
-# TODO BL: Figure out what to do with compatibility
-# our $INCLUDE_DIR = "../inc";
-# our $EXPERIMENTAL_DIR = "../experimental/";
-# our $XMLDIR = "xml";
-our $INCLUDE_DIR = $r->rlocation("sai/inc");
-our $EXPERIMENTAL_DIR = $r->rlocation("sai/experimental");
-our $META_DIR = $r->rlocation("sai/meta");
-our $XMLDIR = $r->rlocation("sai/meta/xml");
-# TODO BL: Figure out if we can use something other than OUTFILEMARKER
-# TODO BL: Figure out if dirname is enough, or we should actually parse the path.
-our $OUTFILEMARKER = $ENV{OUTFILEMARKER};
-our ($irrelevant, $OUTDIR, $irrelevant2) = File::Spec->splitpath($OUTFILEMARKER);
-print "BL: OUTFILEMARKER=$OUTFILEMARKER\n";
-print "BL: OUTDIR=$OUTDIR\n";
+our $INCLUDE_DIR = FindRootDir("inc");
+our $EXPERIMENTAL_DIR = FindRootDir("experimental");
+our $META_DIR = FindRootDir("meta");
+our $XMLDIR = FindRootDir("meta/xml");
+our $OUTDIR = FindOutputDir();
 
 our $MAX_CONDITIONS_LEN = 1;
 
@@ -134,6 +121,42 @@ my %VALUE_TYPES = ();
 my %VALUE_TYPES_TO_VT = ();
 
 my %CAPABILITIES = ();
+
+sub FindRootDir
+{
+  my $wantedDir = shift;
+
+  my $runningUnderBazel = $ENV{RUNNING_UNDER_BAZEL};
+
+  if ($runningUnderBazel == "true") 
+  {
+      require File::Spec;
+      require Runfiles;
+      our $r = Runfiles->create();
+      
+      return $r->rlocation("sai/$wantedDir");
+  }
+  else
+  {
+    return "../$wantedDir";
+  }
+}
+
+sub FindOutputDir
+{
+
+  my $runningUnderBazel = $ENV{RUNNING_UNDER_BAZEL};
+
+  if ($runningUnderBazel == "true")
+  {
+      our ($irrelevant, $outdir, $irrelevant2) = File::Spec->splitpath($ENV{OUTFILEMARKER});
+      return $outdir;
+  }
+  else
+  {
+      return ".";
+  }
+}
 
 sub ProcessTagType
 {

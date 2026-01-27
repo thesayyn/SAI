@@ -242,8 +242,6 @@ sub ReadHeaderFile
     local $/ = undef;
 
     # first search file in meta directory
-    # TODO BL: Because cwd is not set the same when running with bazel, we need to relaitivize files.
-    # We may want to instead make sure we run in the correct cwd.
 
     my $filename = $file;
 
