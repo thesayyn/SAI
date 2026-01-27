@@ -379,8 +379,7 @@ sub WriteMetaDataFiles
 {
     SanityCheckContent();
 
-    # TODO BL: Figure out what to do with the warnings
-    # exit 1 if ($warnings > 0 or $errors > 0);
+    exit 1 if ($warnings > 0 or $errors > 0);
 
     WriteFile("$main::OUTDIR/saimetadata.h", $HEADER_CONTENT);
     WriteFile("$main::OUTDIR/saimetadata.c", $SOURCE_CONTENT);

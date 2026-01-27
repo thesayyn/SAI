@@ -14,7 +14,7 @@ filegroup(
     "aspell.en.pws",
   ] + glob([
     "*.pm",
-    "*cap",
+    "*.cap",
   ]),
 )
 
@@ -24,6 +24,19 @@ filegroup(
   srcs = [
     "//inc:all_headers",
     "//experimental:all_headers",
+  ],
+)
+
+doxygen(
+  name = "doxygen",
+  doxyfile_template = "Doxyfile.bazel",
+  outs = [
+    "xml",
+  ],
+  srcs = [
+    ":constheaders",
+    # $(DEPS)
+    ":deps",
   ],
 )
 
@@ -88,17 +101,4 @@ run_binary(
   env = {
     "OUTFILEMARKER": "$(execpath :saimetadatatest.c)",
   },
-)
-
-doxygen(
-  name = "doxygen",
-  doxyfile_template = "Doxyfile.bazel",
-  outs = [
-    "xml",
-  ],
-  srcs = [
-    ":constheaders",
-    # $(DEPS)
-    ":deps",
-  ],
 )

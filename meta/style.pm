@@ -55,7 +55,15 @@ sub RunAspell
 
     LogInfo "Words to check: $count";
 
-    my @result = `echo "$all" | /usr/bin/aspell -l en -a -p ./aspell.en.pws 2>&1`;
+    my $aspellPws = "$main::META_DIR/aspell.en.pws";
+
+    if (not -f $aspellPws)
+    {
+        LogError "ASPELL dictionary not found in $aspellPws";
+        return;
+    }
+
+    my @result = `echo "$all" | /usr/bin/aspell -l en -a -p $aspellPws 2>&1`;
 
     for my $res (@result)
     {
