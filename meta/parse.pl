@@ -128,7 +128,7 @@ sub FindRootDir
 
   my $runningUnderBazel = $ENV{RUNNING_UNDER_BAZEL};
 
-  if ($runningUnderBazel == "true") 
+  if ($runningUnderBazel eq "true")
   {
       require File::Spec;
       require Runfiles;
@@ -147,7 +147,7 @@ sub FindOutputDir
 
   my $runningUnderBazel = $ENV{RUNNING_UNDER_BAZEL};
 
-  if ($runningUnderBazel == "true")
+  if ($runningUnderBazel eq "true")
   {
       our ($irrelevant, $outdir, $irrelevant2) = File::Spec->splitpath($ENV{OUTFILEMARKER});
       return $outdir;

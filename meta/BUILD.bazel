@@ -3,6 +3,7 @@ package(default_visibility = ["//visibility:public"])
 load("@rules_perl//perl:perl.bzl", "perl_binary", "perl_library")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@bazel_lib//lib:run_binary.bzl", "run_binary")
+load("@bazel_lib//lib:expand_template.bzl", "expand_template_rule")
 load("@bazel_lib//lib:write_source_files.bzl", "write_source_file")
 load("@doxygen//:doxygen.bzl", "doxygen")
 
@@ -27,9 +28,23 @@ filegroup(
   ],
 )
 
+# These templates are later expanded by rules_doxygen
+expand_template_rule(
+  name = "prepare_doxyfile_for_bazel",
+  template = ":Doxyfile",
+  out = "Doxyfile.bazel",
+  substitutions = {
+    "OUTPUT_DIRECTORY       =": "# {{OUTPUT DIRECTORY}}",
+    "# _BAZEL_EXTRAS_": """
+# {{INPUT}}
+# {{ADDITIONAL PARAMETERS}}
+""",
+  },
+)
+
 doxygen(
   name = "doxygen",
-  doxyfile_template = "Doxyfile.bazel",
+  doxyfile_template = ":prepare_doxyfile_for_bazel",
   outs = [
     "xml",
   ],
@@ -103,5 +118,6 @@ run_binary(
   ],
   env = {
     "OUTFILEMARKER": "$(execpath :saimetadatatest.c)",
+    "RUNNING_UNDER_BAZEL": "true",
   },
 )

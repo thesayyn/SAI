@@ -2301,3 +2301,6 @@ GENERATE_LEGEND        = YES
 # This tag requires that the tag HAVE_DOT is set to YES.
 
 DOT_CLEANUP            = YES
+
+# This section will only be used by Bazel when preparing the file to use within bazel.
+# _BAZEL_EXTRAS_
