@@ -60,6 +60,15 @@ filegroup(
   srcs = glob(["*.h"]) + [":saimetadata.h"],
 )
 
+# Export the headers as a library so that their paths are added to the compiler search path.
+# This allows dependencies to include these headers as `#include <file.h>`,
+# without having to figure out the path relative to where they are.
+cc_library(
+  name = "header_lib",
+  hdrs = [":all_headers"],
+  includes = ["."],
+)
+
 filegroup(
   name = "all_srcs",
   srcs = glob(["**/*.h", "**/*.c"]),
@@ -120,4 +129,13 @@ run_binary(
     "OUTFILEMARKER": "$(execpath :saimetadatatest.c)",
     "RUNNING_UNDER_BAZEL": "true",
   },
+)
+
+# Headers that will have to go into the `.deb` package.
+filegroup(
+  name = "deb_headers",
+  srcs = glob([
+    "sai*.h",
+  ]) + [":saimetadata.h"],
+  visibility = ["//visibility:public"],
 )
