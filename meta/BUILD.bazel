@@ -1,141 +1,149 @@
-package(default_visibility = ["//visibility:public"])
-
-load("@rules_perl//perl:perl.bzl", "perl_binary", "perl_library")
-load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
-load("@bazel_lib//lib:run_binary.bzl", "run_binary")
 load("@bazel_lib//lib:expand_template.bzl", "expand_template_rule")
+load("@bazel_lib//lib:run_binary.bzl", "run_binary")
 load("@bazel_lib//lib:write_source_files.bzl", "write_source_file")
 load("@doxygen//:doxygen.bzl", "doxygen")
+load("@rules_perl//perl:perl.bzl", "perl_binary", "perl_library")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+
+package(default_visibility = ["//visibility:public"])
 
 # $(EXTRA) in the Makefile
 filegroup(
-  name = "extra",
-  srcs = [
-    "acronyms.txt",
-    "aspell.en.pws",
-  ] + glob([
-    "*.pm",
-    "*.cap",
-  ]),
+    name = "extra",
+    srcs = [
+        "acronyms.txt",
+        "aspell.en.pws",
+    ] + glob([
+        "*.pm",
+        "*.cap",
+    ]),
 )
 
 # $(DEPS) in the Makefile
 filegroup(
-  name = "deps",
-  srcs = [
-    "//inc:all_headers",
-    "//experimental:all_headers",
-  ],
+    name = "deps",
+    srcs = [
+        "//experimental:all_headers",
+        "//inc:all_headers",
+    ],
 )
 
 # These templates are later expanded by rules_doxygen
 expand_template_rule(
-  name = "prepare_doxyfile_for_bazel",
-  template = ":Doxyfile",
-  out = "Doxyfile.bazel",
-  substitutions = {
-    "OUTPUT_DIRECTORY       =": "# {{OUTPUT DIRECTORY}}",
-    "# _BAZEL_EXTRAS_": """
+    name = "prepare_doxyfile_for_bazel",
+    out = "Doxyfile.bazel",
+    substitutions = {
+        "OUTPUT_DIRECTORY       =": "# {{OUTPUT DIRECTORY}}",
+        "# _BAZEL_EXTRAS_": """
 # {{INPUT}}
 # {{ADDITIONAL PARAMETERS}}
 """,
-  },
+    },
+    template = ":Doxyfile",
 )
 
 doxygen(
-  name = "doxygen",
-  doxyfile_template = ":prepare_doxyfile_for_bazel",
-  outs = [
-    "xml",
-  ],
-  srcs = [
-    ":constheaders",
-    # $(DEPS)
-    ":deps",
-  ],
+    name = "doxygen",
+    srcs = [
+        ":constheaders",
+        # $(DEPS)
+        ":deps",
+    ],
+    outs = [
+        "xml",
+    ],
+    doxyfile_template = ":prepare_doxyfile_for_bazel",
 )
 
 filegroup(
-  name = "all_headers",
-  srcs = glob(["*.h"]) + [":saimetadata.h"],
+    name = "all_headers",
+    srcs = glob(["*.h"]) + [":saimetadata.h"],
 )
 
 # Export the headers as a library so that their paths are added to the compiler search path.
 # This allows dependencies to include these headers as `#include <file.h>`,
 # without having to figure out the path relative to where they are.
 cc_library(
-  name = "header_lib",
-  hdrs = [":all_headers"],
-  includes = ["."],
+    name = "header_lib",
+    hdrs = [":all_headers"],
+    includes = ["."],
 )
 
 filegroup(
-  name = "all_srcs",
-  srcs = glob(["**/*.h", "**/*.c"]),
+    name = "all_srcs",
+    srcs = glob([
+        "**/*.h",
+        "**/*.c",
+    ]),
 )
 
 filegroup(
-  name = "constheaders",
-  srcs = ["saimetadatatypes.h","saimetadatalogger.h", "saimetadatautils.h", "saiserialize.h"],
+    name = "constheaders",
+    srcs = [
+        "saimetadatalogger.h",
+        "saimetadatatypes.h",
+        "saimetadatautils.h",
+        "saiserialize.h",
+    ],
 )
 
 perl_library(
-  name = "perl_lib",
-  srcs = [
-    "utils.pm",
-    "xmlutils.pm",
-    "style.pm",
-    "cap.pm",
-    "serialize.pm",
-    "test.pm",
-  ],
+    name = "perl_lib",
+    srcs = [
+        "cap.pm",
+        "serialize.pm",
+        "style.pm",
+        "test.pm",
+        "utils.pm",
+        "xmlutils.pm",
+    ],
 )
 
 perl_binary(
-  name = "parse",
-  main = "parse.pl",
-  srcs = [
-    "parse.pl",
-  ],
-  deps = [
-    ":perl_lib",
-    "@rules_perl//perl/runfiles",
-  ],
-  env = {
-    "RUNNING_UNDER_BAZEL": "true",
-  },
-  data = [
-    # $(XMLDEPS)
-    ":doxygen",
-    # $(CONSTHEADERS)
-    ":constheaders",
-    # $(EXTRA)
-    ":extra",
-    # $(DEPS)
-    ":deps",
-  ],
+    name = "parse",
+    srcs = [
+        "parse.pl",
+    ],
+    data = [
+        # $(XMLDEPS)
+        ":doxygen",
+        # $(CONSTHEADERS)
+        ":constheaders",
+        # $(EXTRA)
+        ":extra",
+        # $(DEPS)
+        ":deps",
+    ],
+    env = {
+        "RUNNING_UNDER_BAZEL": "true",
+    },
+    main = "parse.pl",
+    deps = [
+        ":perl_lib",
+        "@rules_perl//perl/runfiles",
+    ],
 )
 
 run_binary(
-  name = "run_parse",
-  tool = ":parse",
-  outs = [
-    ":saimetadatatest.c",
-    ":saimetadata.c",
-    ":saimetadata.h",
-    ":saiswig.i",
-  ],
-  env = {
-    "OUTFILEMARKER": "$(execpath :saimetadatatest.c)",
-    "RUNNING_UNDER_BAZEL": "true",
-  },
+    name = "run_parse",
+    outs = [
+        ":saimetadata.c",
+        ":saimetadata.h",
+        ":saimetadatatest.c",
+        ":saiswig.i",
+    ],
+    env = {
+        "OUTFILEMARKER": "$(execpath :saimetadatatest.c)",
+        "RUNNING_UNDER_BAZEL": "true",
+    },
+    tool = ":parse",
 )
 
 # Headers that will have to go into the `.deb` package.
 filegroup(
-  name = "deb_headers",
-  srcs = glob([
-    "sai*.h",
-  ]) + [":saimetadata.h"],
-  visibility = ["//visibility:public"],
+    name = "deb_headers",
+    srcs = glob([
+        "sai*.h",
+    ]) + [":saimetadata.h"],
+    visibility = ["//visibility:public"],
 )
