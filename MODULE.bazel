@@ -8,6 +8,9 @@ bazel_dep(name = "rules_doxygen", version = "2.6.1")
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+# TODO(bazel-ready): Make tests pass
+# TODO(bazel-ready): Add automatic formatting with buildfier
+
 # rules_doxygen can pull releases from GitHub, but 1.8.16 is too old to be there.
 # We need to fetch it from sourceforge.
 http_archive(
