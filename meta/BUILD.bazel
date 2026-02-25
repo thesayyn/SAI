@@ -74,6 +74,7 @@ filegroup(
     srcs = glob([
         "**/*.h",
         "**/*.c",
+        "libsai.cpp",
     ]),
 )
 
