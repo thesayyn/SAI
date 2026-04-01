@@ -76,5 +76,4 @@ apt.install(
         "bookworm-security",
     ],
 )
-apt.lock(into = ":packages.lock")
 use_repo(apt, "bookworm")
